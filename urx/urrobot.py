@@ -261,7 +261,7 @@ class URRobot(object):
         vels = [round(i, self.max_float_length) for i in velocities]
         vels.append(acc)
         vels.append(min_time)
-        prog = "{}([{},{},{},{},{},{}], a={}, t_min={})".format(command, *vels)
+        prog = "{}([{},{},{},{},{},{}], a={}, t={})".format(command, *vels)
         self.send_program(prog)
 
     def movej(self, joints, acc=0.1, vel=0.05, wait=True, relative=False, threshold=None):
@@ -283,11 +283,11 @@ class URRobot(object):
         """
         return self.movex("movel", tpose, acc=acc, vel=vel, wait=wait, relative=relative, threshold=threshold)
 
-    def movep(self, tpose, acc=0.01, vel=0.01, wait=True, relative=False, threshold=None):
+    def movep(self, tpose, acc=0.01, vel=0.01, wait=True, relative=False, threshold=None, radius=0):
         """
         Send a movep command to the robot. See URScript documentation.
         """
-        return self.movex("movep", tpose, acc=acc, vel=vel, wait=wait, relative=relative, threshold=threshold)
+        return self.movex("movep", tpose, acc=acc, vel=vel, wait=wait, relative=relative, threshold=threshold, radius=radius)
 
     def servoc(self, tpose, acc=0.01, vel=0.01, wait=True, relative=False, threshold=None):
         """
@@ -302,7 +302,7 @@ class URRobot(object):
         tpose.append(radius)
         return "{}({}[{},{},{},{},{},{}], a={}, v={}, r={})".format(command, prefix, *tpose)
 
-    def movex(self, command, tpose, acc=0.01, vel=0.01, wait=True, relative=False, threshold=None):
+    def movex(self, command, tpose, acc=0.01, vel=0.01, wait=True, relative=False, threshold=None, radius=0):
         """
         Send a move command to the robot. since UR robotene have several methods this one
         sends whatever is defined in 'command' string
@@ -310,7 +310,7 @@ class URRobot(object):
         if relative:
             l = self.getl()
             tpose = [v + l[i] for i, v in enumerate(tpose)]
-        prog = self._format_move(command, tpose, acc, vel, prefix="p")
+        prog = self._format_move(command, tpose, acc, vel, prefix="p", radius=radius)
         self.send_program(prog)
         if wait:
             self._wait_for_move(tpose[:6], threshold=threshold)
